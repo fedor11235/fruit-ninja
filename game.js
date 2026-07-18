@@ -5,6 +5,48 @@
 let ysdk = null;
 let sdkReady = false;
 
+/* ================= Локализация ================= */
+
+const I18N = {
+  ru: {
+    title: '🍉 Фруктовый ниндзя',
+    intro: 'Режь фрукты свайпом. Не задевай бомбы 💣 и не роняй фрукты!',
+    play: 'Играть',
+    again: 'Ещё раз',
+    over: '💥 Игра окончена',
+    score: 'Счёт: ',
+    best: 'Рекорд: ',
+    combo: 'Комбо x{n}!',
+  },
+  en: {
+    title: '🍉 Ninja Fruit Slash',
+    intro: 'Slice fruit with swipes. Avoid bombs 💣 and don\'t drop the fruit!',
+    play: 'Play',
+    again: 'Play again',
+    over: '💥 Game over',
+    score: 'Score: ',
+    best: 'Best: ',
+    combo: 'Combo x{n}!',
+  },
+};
+
+let L = I18N.ru;
+
+function applyLang() {
+  let lang = '';
+  if (ysdk && ysdk.environment && ysdk.environment.i18n && ysdk.environment.i18n.lang) {
+    lang = ysdk.environment.i18n.lang;
+  } else {
+    lang = (navigator.language || 'ru').slice(0, 2);
+  }
+  L = I18N[lang] || I18N.en;
+  document.documentElement.lang = lang === 'ru' ? 'ru' : 'en';
+  document.title = L.title.replace(/^\S+\s/, '');
+  overlayEl.querySelector('h1').textContent = L.title;
+  overlayTextEl.textContent = L.intro;
+  startBtn.textContent = L.play;
+}
+
 function initSDK() {
   if (typeof YaGames === 'undefined' || window.__ysdkFailed) {
     sdkReady = true;
@@ -345,10 +387,10 @@ function gameOver() {
     state.best = state.score;
     saveBest(state.best);
   }
-  overlayEl.querySelector('h1').textContent = '💥 Игра окончена';
-  overlayTextEl.textContent = 'Счёт: ' + state.score;
-  bestEl.textContent = 'Рекорд: ' + state.best;
-  startBtn.textContent = 'Ещё раз';
+  overlayEl.querySelector('h1').textContent = L.over;
+  overlayTextEl.textContent = L.score + state.score;
+  bestEl.textContent = L.best + state.best;
+  startBtn.textContent = L.again;
   overlayEl.classList.remove('hidden');
 }
 
@@ -515,7 +557,7 @@ function tick(now) {
       if (state.comboTimer <= 0) state.comboCount = 0;
     }
     if (state.comboCount >= 3) {
-      comboEl.textContent = 'Комбо x' + state.comboCount + '!';
+      comboEl.textContent = L.combo.replace('{n}', state.comboCount);
       comboEl.classList.add('show');
     } else {
       comboEl.classList.remove('show');
@@ -578,7 +620,8 @@ function tick(now) {
 /* ================= Запуск ================= */
 
 initSDK().then(() => {
-  bestEl.textContent = state.best > 0 ? 'Рекорд: ' + state.best : '';
+  applyLang();
+  bestEl.textContent = state.best > 0 ? L.best + state.best : '';
   updateHud();
   requestAnimationFrame(tick);
 });
