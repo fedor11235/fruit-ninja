@@ -1,0 +1,5 @@
+— Hold the mouse button or touch the screen and swipe across fruit to slice it.
+— Don't touch the bombs — one hit and the game is over.
+— Don't let fruit fall: every dropped fruit costs one of your three lives.
+— Slice three or more fruits in one swipe to double your points with a combo.
+— Over time fruit flies faster and more often. Survive as long as you can and beat your record!

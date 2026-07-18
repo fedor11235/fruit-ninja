@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>html,body{margin:0;overflow:hidden}</style>
+</head>
+<body>
+<canvas id="c" width="512" height="512"></canvas>
+<script>
+const ctx = document.getElementById('c').getContext('2d');
+const S = 512;
+
+// фон
+const bg = ctx.createRadialGradient(S/2, S*0.4, 60, S/2, S/2, S*0.75);
+bg.addColorStop(0, '#3b2455');
+bg.addColorStop(1, '#150d20');
+ctx.fillStyle = bg;
+ctx.fillRect(0, 0, S, S);
+
+// брызги сока на фоне
+const drops = [[90,120,14],[420,90,10],[440,400,16],[80,410,11],[250,60,8],[60,250,9],[456,250,8]];
+ctx.fillStyle = 'rgba(229,57,53,0.55)';
+for (const [x,y,r] of drops) { ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); }
+
+function halfMelon(x, y, r, angle, dir) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  const start = dir > 0 ? 0 : Math.PI;
+  ctx.fillStyle = '#ef5350';
+  ctx.beginPath(); ctx.arc(0, 0, r, start, start + Math.PI); ctx.closePath(); ctx.fill();
+  // косточки
+  ctx.fillStyle = '#3e2723';
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath();
+    ctx.ellipse(i * r * 0.3, dir * r * 0.45, 6, 9, i * 0.4, 0, 7);
+    ctx.fill();
+  }
+  ctx.strokeStyle = '#2e7d32';
+  ctx.lineWidth = 20;
+  ctx.beginPath(); ctx.arc(0, 0, r - 10, start, start + Math.PI); ctx.stroke();
+  ctx.strokeStyle = '#a5d6a7';
+  ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.arc(0, 0, r - 22, start, start + Math.PI); ctx.stroke();
+  ctx.restore();
+}
+
+// две половинки арбуза, разлетающиеся от разреза
+halfMelon(S/2 - 36, S/2 - 30, 165, -0.5, -1);
+halfMelon(S/2 + 36, S/2 + 42, 165, -0.5, 1);
+
+// след клинка
+const blade = ctx.createLinearGradient(60, 420, 452, 92);
+blade.addColorStop(0, 'rgba(255,255,255,0)');
+blade.addColorStop(0.5, 'rgba(255,255,255,0.95)');
+blade.addColorStop(1, 'rgba(255,255,255,0)');
+ctx.strokeStyle = blade;
+ctx.lineWidth = 16;
+ctx.lineCap = 'round';
+ctx.beginPath();
+ctx.moveTo(60, 420);
+ctx.quadraticCurveTo(S/2 + 20, S/2 - 40, 452, 92);
+ctx.stroke();
+</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>screenshot</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="hud">
+    <div id="score">0</div>
+    <div id="combo"></div>
+    <div id="lives"></div>
+  </div>
+  <div id="overlay">
+    <div class="panel">
+      <h1>🍉 Fruit Ninja</h1>
+      <p id="overlay-text"></p>
+      <p id="best"></p>
+      <button id="start-btn">Играть</button>
+    </div>
+  </div>
+  <script src="/game.js"></script>
+  <script>
+    // Постановочный кадр для скриншотов витрины: расставляем сцену,
+    // даём паре кадров отрисоваться и замораживаем игру паузой.
+    const q = new URLSearchParams(location.search);
+    setTimeout(() => {
+      startGame();
+      state.spawnTimer = 999; // отключаем случайный спавн
+      const spots = [[0.18,0.45],[0.34,0.25],[0.55,0.6],[0.68,0.3],[0.86,0.5],[0.42,0.78],[0.76,0.75]];
+      state.fruits = spots.map(([px, py], i) => {
+        const type = FRUITS[i % FRUITS.length];
+        return {
+          isBomb: false, type,
+          x: W * px, y: H * py,
+          vx: 0, vy: -60,
+          r: type.r,
+          rot: i * 1.3, vrot: 0,
+        };
+      });
+      if (q.has('bomb')) {
+        const f = state.fruits[3];
+        f.isBomb = true;
+        f.r = 28;
+      }
+      if (q.has('slice')) {
+        const cut = state.fruits[2];
+        state.fruits.splice(2, 1);
+        sliceFruit({ x: cut.x, y: cut.y, vx: 0, vy: -150, r: 44, type: FRUITS[0] }, -0.5);
+        state.comboCount = 3;
+        state.comboTimer = 5;
+        // след клинка через центр разреза
+        const now = performance.now();
+        for (let i = 0; i < 14; i++) {
+          const t = i / 13;
+          state.trail.push({ x: W*(0.3 + t*0.5), y: H*(0.78 - t*0.32), t: now + 120 });
+        }
+      }
+      state.score = Number(q.get('score') || 0);
+      scoreEl.textContent = state.score;
+      // замораживаем после трёх отрисованных кадров со сценой
+      let frames = 0;
+      const origRaf = window.requestAnimationFrame.bind(window);
+      window.requestAnimationFrame = (cb) => origRaf((t) => {
+        cb(t);
+        if (++frames >= 3) state.paused = true;
+      });
+    }, 100);
+  </script>
+</body>
+</html>

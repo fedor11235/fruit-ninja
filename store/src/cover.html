@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>html,body{margin:0;overflow:hidden}</style>
+</head>
+<body>
+<canvas id="c" width="800" height="470"></canvas>
+<script>
+const ctx = document.getElementById('c').getContext('2d');
+const W = 800, H = 470;
+const TITLE = new URLSearchParams(location.search).get('en') !== null
+  ? 'NINJA FRUIT SLASH'
+  : 'ФРУКТОВЫЙ НИНДЗЯ';
+
+const bg = ctx.createLinearGradient(0, 0, 0, H);
+bg.addColorStop(0, '#33204a');
+bg.addColorStop(1, '#120b1c');
+ctx.fillStyle = bg;
+ctx.fillRect(0, 0, W, H);
+
+// брызги
+ctx.fillStyle = 'rgba(229,57,53,0.5)';
+const drops = [[70,80,12],[720,60,9],[760,380,14],[50,390,10],[400,40,7],[640,420,8],[180,430,9]];
+for (const [x,y,r] of drops) { ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); }
+
+function fruit(x, y, r, skin, shine) {
+  ctx.fillStyle = skin;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.beginPath(); ctx.ellipse(x - r*0.35, y - r*0.35, r*0.3, r*0.18, -0.6, 0, 7); ctx.fill();
+}
+
+function halfMelon(x, y, r, angle, dir) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  const start = dir > 0 ? 0 : Math.PI;
+  ctx.fillStyle = '#ef5350';
+  ctx.beginPath(); ctx.arc(0, 0, r, start, start + Math.PI); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#3e2723';
+  for (let i = -1; i <= 1; i++) {
+    ctx.beginPath(); ctx.ellipse(i*r*0.35, dir*r*0.4, 4, 7, i*0.4, 0, 7); ctx.fill();
+  }
+  ctx.strokeStyle = '#2e7d32';
+  ctx.lineWidth = 13;
+  ctx.beginPath(); ctx.arc(0, 0, r - 7, start, start + Math.PI); ctx.stroke();
+  ctx.restore();
+}
+
+// фрукты по краям
+fruit(120, 320, 46, '#fb8c00');
+fruit(680, 300, 40, '#c62828');
+fruit(230, 400, 30, '#9ccc65');
+fruit(590, 405, 26, '#6a1b9a');
+
+// разрезанный арбуз в центре
+halfMelon(365, 300, 88, -0.45, -1);
+halfMelon(435, 345, 88, -0.45, 1);
+
+// след клинка
+const blade = ctx.createLinearGradient(100, 430, 700, 180);
+blade.addColorStop(0, 'rgba(255,255,255,0)');
+blade.addColorStop(0.5, 'rgba(255,255,255,0.95)');
+blade.addColorStop(1, 'rgba(255,255,255,0)');
+ctx.strokeStyle = blade;
+ctx.lineWidth = 12;
+ctx.lineCap = 'round';
+ctx.beginPath();
+ctx.moveTo(100, 430);
+ctx.quadraticCurveTo(420, 300, 700, 180);
+ctx.stroke();
+
+// заголовок
+ctx.textAlign = 'center';
+ctx.font = '800 64px "Segoe UI", system-ui, sans-serif';
+ctx.shadowColor = 'rgba(0,0,0,0.7)';
+ctx.shadowBlur = 18;
+ctx.shadowOffsetY = 5;
+const tg = ctx.createLinearGradient(0, 60, 0, 140);
+tg.addColorStop(0, '#ffd54f');
+tg.addColorStop(1, '#ff8a65');
+ctx.fillStyle = tg;
+ctx.fillText(TITLE, W/2, 125);
+ctx.shadowColor = 'transparent';
+</script>
+</body>
+</html>
