@@ -72,6 +72,77 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
+/* ================= Звук (Web Audio, без файлов) ================= */
+
+const audio = {
+  ctx: null,
+  ensure() {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!this.ctx) this.ctx = new AC();
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    return this.ctx;
+  },
+};
+
+function tone(freq, dur, opts) {
+  const o = opts || {};
+  const actx = audio.ensure();
+  if (!actx) return;
+  const t0 = actx.currentTime + (o.delay || 0);
+  const osc = actx.createOscillator();
+  const g = actx.createGain();
+  osc.type = o.type || 'sine';
+  osc.frequency.setValueAtTime(freq, t0);
+  if (o.slide) osc.frequency.exponentialRampToValueAtTime(Math.max(1, freq + o.slide), t0 + dur);
+  g.gain.setValueAtTime(o.vol || 0.2, t0);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  osc.connect(g).connect(actx.destination);
+  osc.start(t0);
+  osc.stop(t0 + dur + 0.05);
+}
+
+function noise(dur, opts) {
+  const o = opts || {};
+  const actx = audio.ensure();
+  if (!actx) return;
+  const t0 = actx.currentTime + (o.delay || 0);
+  const len = Math.ceil(actx.sampleRate * dur);
+  const buf = actx.createBuffer(1, len, actx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+  const src = actx.createBufferSource();
+  src.buffer = buf;
+  const f = actx.createBiquadFilter();
+  f.type = 'bandpass';
+  f.frequency.setValueAtTime(o.freq || 1000, t0);
+  f.Q.value = o.q || 1;
+  if (o.slide) f.frequency.exponentialRampToValueAtTime(Math.max(20, (o.freq || 1000) + o.slide), t0 + dur);
+  const g = actx.createGain();
+  g.gain.setValueAtTime(o.vol || 0.3, t0);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  src.connect(f);
+  f.connect(g);
+  g.connect(actx.destination);
+  src.start(t0);
+  src.stop(t0 + dur + 0.05);
+}
+
+const sfx = {
+  start() { tone(500, 0.1, { type: 'triangle', vol: 0.15, slide: 200 }); },
+  slice() {
+    noise(0.12, { vol: 0.25, freq: 2500, slide: -1800, q: 2 });
+    tone(700, 0.08, { type: 'triangle', vol: 0.12, slide: -300 });
+  },
+  boom() {
+    noise(0.5, { vol: 0.5, freq: 400, slide: -350, q: 0.7 });
+    tone(120, 0.5, { type: 'sine', vol: 0.5, slide: -80 });
+  },
+  drop() { tone(300, 0.25, { type: 'square', vol: 0.08, slide: -150 }); },
+  combo() { [660, 880, 1100].forEach((f, i) => tone(f, 0.12, { type: 'triangle', vol: 0.15, delay: i * 0.07 })); },
+  over() { [400, 300, 200].forEach((f, i) => tone(f, 0.3, { type: 'sawtooth', vol: 0.12, delay: i * 0.18 })); },
+};
+
 /* ================= Данные фруктов ================= */
 
 const FRUITS = [
@@ -168,6 +239,7 @@ function segCircle(x1, y1, x2, y2, cx, cy, r) {
 }
 
 function sliceFruit(f, angle) {
+  sfx.slice();
   const t = f.type;
   for (const dir of [-1, 1]) {
     state.halves.push({
@@ -199,6 +271,7 @@ function sliceFruit(f, angle) {
 }
 
 function explodeBomb(f) {
+  sfx.boom();
   for (let i = 0; i < 30; i++) {
     const a = Math.random() * Math.PI * 2;
     const sp = 80 + Math.random() * 400;
@@ -235,6 +308,7 @@ function checkSlices() {
     sliceFruit(f, angle);
     state.comboCount += 1;
     state.comboTimer = 0.35;
+    if (state.comboCount === 3) sfx.combo();
     const gained = f.type.score * (state.comboCount >= 3 ? 2 : 1);
     state.score += gained;
     updateHud();
@@ -244,6 +318,8 @@ function checkSlices() {
 /* ================= Жизненный цикл ================= */
 
 function startGame() {
+  audio.ensure();
+  sfx.start();
   state.running = true;
   state.paused = false;
   state.score = 0;
@@ -262,6 +338,7 @@ function startGame() {
 }
 
 function gameOver() {
+  sfx.over();
   state.running = false;
   gameplayStop();
   if (state.score > state.best) {
@@ -281,10 +358,12 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     state.paused = true;
     if (state.running) gameplayStop();
+    if (audio.ctx) audio.ctx.suspend();
   } else {
     state.paused = false;
     lastTime = performance.now();
     if (state.running) gameplayStart();
+    if (audio.ctx) audio.ctx.resume();
   }
 });
 
@@ -454,6 +533,7 @@ function tick(now) {
       state.fruits.splice(i, 1);
       if (!f.isBomb && state.running) {
         state.lives -= 1;
+        sfx.drop();
         updateHud();
         if (state.lives <= 0) gameOver();
       }
