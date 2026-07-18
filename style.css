@@ -1,0 +1,126 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: #1a1223;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#game {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  cursor: crosshair;
+}
+
+#hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px 24px;
+  pointer-events: none;
+  color: #fff;
+}
+
+#score {
+  font-size: 42px;
+  font-weight: 800;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+#combo {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffd54f;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+#combo.show {
+  opacity: 1;
+}
+
+#lives {
+  font-size: 28px;
+  letter-spacing: 4px;
+}
+
+#overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 5, 18, 0.75);
+  backdrop-filter: blur(4px);
+  transition: opacity 0.3s;
+}
+
+#overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.panel {
+  text-align: center;
+  color: #fff;
+  padding: 40px 48px;
+  background: rgba(30, 20, 45, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  max-width: 420px;
+}
+
+.panel h1 {
+  font-size: 44px;
+  margin-bottom: 16px;
+}
+
+.panel p {
+  font-size: 17px;
+  line-height: 1.5;
+  color: #cbbfdd;
+  margin-bottom: 12px;
+}
+
+#best {
+  font-weight: 700;
+  color: #ffd54f;
+}
+
+#start-btn {
+  margin-top: 12px;
+  padding: 14px 48px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1223;
+  background: linear-gradient(135deg, #ffd54f, #ff8a65);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 6px 20px rgba(255, 138, 101, 0.4);
+}
+
+#start-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 28px rgba(255, 138, 101, 0.6);
+}
+
+#start-btn:active {
+  transform: scale(0.97);
+}

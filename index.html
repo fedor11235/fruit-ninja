@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Fruit Ninja</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="hud">
+    <div id="score">0</div>
+    <div id="combo"></div>
+    <div id="lives"></div>
+  </div>
+
+  <div id="overlay">
+    <div class="panel">
+      <h1>🍉 Fruit Ninja</h1>
+      <p id="overlay-text">Режь фрукты свайпом. Не задевай бомбы 💣 и не роняй фрукты!</p>
+      <p id="best"></p>
+      <button id="start-btn">Играть</button>
+    </div>
+  </div>
+
+  <script src="https://sdk.games.s3.yandex.net/sdk.js" onerror="window.__ysdkFailed=true"></script>
+  <script src="game.js"></script>
+</body>
+</html>
