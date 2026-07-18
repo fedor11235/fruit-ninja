@@ -24,7 +24,29 @@
     </div>
   </div>
 
-  <script src="/sdk.js" onerror="window.__ysdkFailed=true"></script>
-  <script src="game.js"></script>
+  <script>
+    // Грузим Yandex SDK: сначала /sdk.js (хостинг Яндекс Игр), при неудаче —
+    // CDN-адрес, и только после этого стартуем игру.
+    (function () {
+      function loadGame() {
+        var s = document.createElement('script');
+        s.src = 'game.js';
+        document.body.appendChild(s);
+      }
+      function tryLoad(src, onFail) {
+        var s = document.createElement('script');
+        s.src = src;
+        s.onload = loadGame;
+        s.onerror = onFail;
+        document.body.appendChild(s);
+      }
+      tryLoad('/sdk.js', function () {
+        tryLoad('https://sdk.games.s3.yandex.net/sdk.js', function () {
+          window.__ysdkFailed = true;
+          loadGame();
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
